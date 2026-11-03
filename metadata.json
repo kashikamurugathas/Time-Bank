@@ -1,0 +1,8 @@
+{
+  "name": "Time Bank – Community Time Exchange Platform",
+  "description": "Connect with your community, exchange valuable skills, and help one another grow using time credits instead of money.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
