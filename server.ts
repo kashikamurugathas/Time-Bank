@@ -34,6 +34,10 @@ async function startServer() {
   // Mount API Gateway
   app.use('/api', apiRouter);
 
+  // Serve static public assets in both development and production
+  const publicPath = path.resolve(__dirname, 'public');
+  app.use(express.static(publicPath));
+
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.json({ status: 'healthy', platform: 'Time Bank', timestamp: new Date().toISOString() });
@@ -44,8 +48,21 @@ async function startServer() {
 
   if (isDev) {
     const { createServer: createViteServer } = await import('vite');
+    const isHttps = process.env.APP_URL?.startsWith('https') ?? false;
+    const clientPort = isHttps ? 443 : PORT;
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        ws: {
+          server,
+          clientPort,
+        },
+        hmr: {
+          server,
+          clientPort,
+        },
+        watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);

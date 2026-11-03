@@ -9,7 +9,8 @@ export function initSocketIO(httpServer: HTTPServer) {
     cors: {
       origin: '*',
       methods: ['GET', 'POST']
-    }
+    },
+    destroyUpgrade: false
   });
 
   ioInstance.on('connection', (socket) => {

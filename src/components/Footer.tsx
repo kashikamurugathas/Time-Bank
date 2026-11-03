@@ -28,11 +28,11 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentView }) => {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#8E51FF]" />
-                <span>community@timebank.lk</span>
+                <a href="mailto:mamurugathas@gmail.com" className="hover:text-white transition-colors">mamurugathas@gmail.com</a>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#8E51FF]" />
-                <span>+94 77 123 4567</span>
+                <a href="tel:0766695355" className="hover:text-white transition-colors">0766695355</a>
               </div>
             </div>
           </div>

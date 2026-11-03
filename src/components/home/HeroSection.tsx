@@ -1,20 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, Shield, Sparkles, ArrowRight, CheckCircle2, Users, HeartHandshake } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
+import heroBgPhoto from '../../assets/images/time_bank_hero_bg_1793681906806.jpg';
+import teamworkPhoto from '../../assets/images/community_teamwork_photo_1793713257838.jpg';
 
 interface HeroSectionProps {
   setCurrentView: (view: string) => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ setCurrentView }) => {
-  const { user, setShowRegisterModal, setShowLoginModal, quickLoginAs } = useAuth();
+  const { user, setShowRegisterModal } = useAuth();
+  const [bgSrc, setBgSrc] = useState<string>(heroBgPhoto || '/images/time_bank_hero_bg.jpg');
+  const [teamworkSrc, setTeamworkSrc] = useState<string>(teamworkPhoto || '/images/community_teamwork_photo.jpg');
 
   return (
     <div className="relative overflow-hidden bg-[#452080] text-white">
       {/* Background Photograph with Purple Gradients */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/src/assets/images/time_bank_hero_bg_1793681906806.jpg"
+          src={bgSrc}
+          onError={() => {
+            if (bgSrc !== '/images/time_bank_hero_bg.jpg') {
+              setBgSrc('/images/time_bank_hero_bg.jpg');
+            } else {
+              setBgSrc('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80');
+            }
+          }}
           alt="Time Bank Community Volunteers"
           className="w-full h-full object-cover object-center scale-105"
         />
@@ -101,11 +112,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setCurrentView }) => {
           <div className="lg:col-span-4 flex justify-center">
             <div className="relative w-full max-w-md group">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-300 to-purple-500 rounded-[26px] opacity-40 blur-sm group-hover:opacity-60 transition-opacity" />
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 border-2 border-white/25">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#452080] via-[#522599] to-[#6C3FC5] border-2 border-white/25">
                 <img
-                  src="/src/assets/images/community_teamwork_photo_1793713257838.jpg"
+                  src={teamworkSrc}
+                  onError={() => {
+                    if (teamworkSrc !== '/images/community_teamwork_photo.jpg') {
+                      setTeamworkSrc('/images/community_teamwork_photo.jpg');
+                    } else {
+                      setTeamworkSrc('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1200&q=80');
+                    }
+                  }}
                   alt="Community Members Sharing Skills"
                   className="w-full h-auto object-cover aspect-[4/3] transform transition-transform duration-500 hover:scale-[1.02]"
+                  loading="eager"
                 />
                 <div className="p-4 bg-[#341663]/90 backdrop-blur-md text-white border-t border-white/15">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-white">

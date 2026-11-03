@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, Clock, Heart, Users, Sparkles, Shield, Compass, BookOpen, SunMedium } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
+import teamworkPhoto from '../../assets/images/community_teamwork_photo_1793713257838.jpg';
+import heroBgPhoto from '../../assets/images/time_bank_hero_bg_1793681906806.jpg';
 
 interface HomePageProps {
   setCurrentView: (view: string) => void;
@@ -10,6 +12,8 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ setCurrentView, onJoinCommunity, onExplore }) => {
   const { user } = useAuth();
+  const [teamworkSrc, setTeamworkSrc] = useState<string>(teamworkPhoto || '/images/community_teamwork_photo.jpg');
+  const [heroBgSrc, setHeroBgSrc] = useState<string>(heroBgPhoto || '/images/time_bank_hero_bg.jpg');
 
   const handleJoinClick = () => {
     if (user) {
@@ -68,11 +72,28 @@ export const HomePage: React.FC<HomePageProps> = ({ setCurrentView, onJoinCommun
     <div className="bg-[#F7F7FB]">
       {/* 1. Welcoming Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#452080] via-[#522599] to-[#6C3FC5] text-white pt-16 pb-20 lg:pt-20 lg:pb-28">
+        {/* Hero Background Image with Purple Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img
+            src={heroBgSrc}
+            onError={() => {
+              if (heroBgSrc !== '/images/time_bank_hero_bg.jpg') {
+                setHeroBgSrc('/images/time_bank_hero_bg.jpg');
+              } else {
+                setHeroBgSrc('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80');
+              }
+            }}
+            alt="Time Bank Community Network"
+            className="w-full h-full object-cover object-center scale-105 opacity-15"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#452080]/95 via-[#522599]/90 to-[#6C3FC5]/95" />
+        </div>
+
         {/* Decorative ambient glow */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Column: Heading & Value Proposition */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
@@ -135,11 +156,19 @@ export const HomePage: React.FC<HomePageProps> = ({ setCurrentView, onJoinCommun
                 {/* Decorative border accent */}
                 <div className="absolute -inset-1.5 bg-gradient-to-r from-purple-300 via-white/50 to-purple-400 rounded-[28px] opacity-40 blur-md group-hover:opacity-70 transition-opacity" />
 
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 border-2 border-white/30">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#452080] via-[#522599] to-[#6C3FC5] border-2 border-white/30">
                   <img
-                    src="/src/assets/images/community_teamwork_photo_1793713257838.jpg"
+                    src={teamworkSrc}
+                    onError={() => {
+                      if (teamworkSrc !== '/images/community_teamwork_photo.jpg') {
+                        setTeamworkSrc('/images/community_teamwork_photo.jpg');
+                      } else {
+                        setTeamworkSrc('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1200&q=80');
+                      }
+                    }}
                     alt="Community Teamwork & Skill Sharing"
                     className="w-full h-auto object-cover aspect-[4/3] transform transition-transform duration-500 hover:scale-[1.02]"
+                    loading="eager"
                   />
 
                   {/* Overlaid caption card */}

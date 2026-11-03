@@ -171,11 +171,15 @@ export const FaqContactSection: React.FC = () => {
               <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-[#6C3FC5]" />
-                  <span>+94 77 123 4567</span>
+                  <a href="tel:0766695355" className="hover:text-[#6C3FC5] transition-colors font-medium text-gray-700">
+                    0766695355
+                  </a>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-[#6C3FC5]" />
-                  <span>support@timebank.lk</span>
+                  <a href="mailto:mamurugathas@gmail.com" className="hover:text-[#6C3FC5] transition-colors font-medium text-gray-700">
+                    mamurugathas@gmail.com
+                  </a>
                 </div>
               </div>
             </div>
