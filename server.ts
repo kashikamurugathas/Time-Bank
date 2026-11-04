@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import apiRouter from './server/gateway/router.ts';
 import { initSocketIO } from './server/socket.ts';
-import { seedDatabase } from './server/db/seed.ts';
+import { migrateAndSeedMicroservices } from './server/microservices/common/migrator.ts';
+import { startAllMicroservices } from './server/microservices/runner.ts';
 
 dotenv.config();
 
@@ -21,11 +22,17 @@ async function startServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // Seed SQLite database on startup
+  // Initialize and migrate microservices SQLite databases
   try {
-    await seedDatabase();
+    await migrateAndSeedMicroservices();
+    console.log('Time Bank microservices databases initialized and verified.');
   } catch (err: any) {
-    console.error('Database seeding error:', err.message);
+    console.error('Microservices database migration notice:', err.message);
+  }
+
+  // Optionally launch independent microservice ports if requested
+  if (process.env.ENABLE_INDEPENDENT_MICROSERVICE_PORTS === 'true') {
+    startAllMicroservices().catch(e => console.warn('Microservices port binding notice:', e.message));
   }
 
   // Initialize Socket.IO for real-time messaging

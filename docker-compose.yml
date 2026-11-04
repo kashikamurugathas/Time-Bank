@@ -1,0 +1,286 @@
+version: '3.8'
+
+networks:
+  timebank-net:
+    driver: bridge
+
+volumes:
+  timebank-data:
+    driver: local
+
+services:
+  # 1. API Gateway Service (Entry point for frontend clients)
+  api-gateway:
+    build: .
+    container_name: timebank-api-gateway
+    command: ["npx", "tsx", "server.ts"]
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - USER_SERVICE_URL=http://user-service:5002
+      - ADMIN_SERVICE_URL=http://admin-service:5003
+      - SKILL_SERVICE_URL=http://skill-service:5004
+      - LOCATION_SERVICE_URL=http://location-service:5005
+      - REQUEST_SERVICE_URL=http://request-service:5006
+      - BOOKING_SERVICE_URL=http://booking-service:5007
+      - WALLET_SERVICE_URL=http://wallet-service:5008
+      - MESSAGING_SERVICE_URL=http://messaging-service:5009
+      - EMAIL_SERVICE_URL=http://email-service:5010
+      - SUBSCRIPTION_SERVICE_URL=http://subscription-service:5011
+      - PAYMENT_SERVICE_URL=http://payment-service:5012
+      - AI_SERVICE_URL=http://ai-service:5013
+      - REVIEW_SERVICE_URL=http://review-service:5014
+      - ANALYTICS_SERVICE_URL=http://analytics-service:5015
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # 2. Authentication Service
+  auth-service:
+    build: .
+    container_name: timebank-auth-service
+    command: ["npx", "tsx", "server/microservices/auth/server.ts"]
+    ports:
+      - "5001:5001"
+    environment:
+      - AUTH_SERVICE_PORT=5001
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 3. User Management Service
+  user-service:
+    build: .
+    container_name: timebank-user-service
+    command: ["npx", "tsx", "server/microservices/users/server.ts"]
+    ports:
+      - "5002:5002"
+    environment:
+      - USER_SERVICE_PORT=5002
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 4. Admin Approval Service
+  admin-service:
+    build: .
+    container_name: timebank-admin-service
+    command: ["npx", "tsx", "server/microservices/admin/server.ts"]
+    ports:
+      - "5003:5003"
+    environment:
+      - ADMIN_SERVICE_PORT=5003
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 5. Skill Management Service
+  skill-service:
+    build: .
+    container_name: timebank-skill-service
+    command: ["npx", "tsx", "server/microservices/skills/server.ts"]
+    ports:
+      - "5004:5004"
+    environment:
+      - SKILL_SERVICE_PORT=5004
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 6. Location and Recommendation Service
+  location-service:
+    build: .
+    container_name: timebank-location-service
+    command: ["npx", "tsx", "server/microservices/location/server.ts"]
+    ports:
+      - "5005:5005"
+    environment:
+      - LOCATION_SERVICE_PORT=5005
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 7. Help Request Service
+  request-service:
+    build: .
+    container_name: timebank-request-service
+    command: ["npx", "tsx", "server/microservices/requests/server.ts"]
+    ports:
+      - "5006:5006"
+    environment:
+      - REQUEST_SERVICE_PORT=5006
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 8. Booking and Scheduling Service
+  booking-service:
+    build: .
+    container_name: timebank-booking-service
+    command: ["npx", "tsx", "server/microservices/bookings/server.ts"]
+    ports:
+      - "5007:5007"
+    environment:
+      - BOOKING_SERVICE_PORT=5007
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 9. Time Credit Wallet Service
+  wallet-service:
+    build: .
+    container_name: timebank-wallet-service
+    command: ["npx", "tsx", "server/microservices/wallet/server.ts"]
+    ports:
+      - "5008:5008"
+    environment:
+      - WALLET_SERVICE_PORT=5008
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 10. Messaging Service
+  messaging-service:
+    build: .
+    container_name: timebank-messaging-service
+    command: ["npx", "tsx", "server/microservices/messaging/server.ts"]
+    ports:
+      - "5009:5009"
+    environment:
+      - MESSAGING_SERVICE_PORT=5009
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 11. Email Notification Service
+  email-service:
+    build: .
+    container_name: timebank-email-service
+    command: ["npx", "tsx", "server/microservices/email/server.ts"]
+    ports:
+      - "5010:5010"
+    environment:
+      - EMAIL_SERVICE_PORT=5010
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 12. Subscription Service
+  subscription-service:
+    build: .
+    container_name: timebank-subscription-service
+    command: ["npx", "tsx", "server/microservices/subscriptions/server.ts"]
+    ports:
+      - "5011:5011"
+    environment:
+      - SUBSCRIPTION_SERVICE_PORT=5011
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 13. Payment Service
+  payment-service:
+    build: .
+    container_name: timebank-payment-service
+    command: ["npx", "tsx", "server/microservices/payments/server.ts"]
+    ports:
+      - "5012:5012"
+    environment:
+      - PAYMENT_SERVICE_PORT=5012
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 14. AI Agent Service
+  ai-service:
+    build: .
+    container_name: timebank-ai-service
+    command: ["npx", "tsx", "server/microservices/ai/server.ts"]
+    ports:
+      - "5013:5013"
+    environment:
+      - AI_SERVICE_PORT=5013
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 15. Review and Rating Service
+  review-service:
+    build: .
+    container_name: timebank-review-service
+    command: ["npx", "tsx", "server/microservices/reviews/server.ts"]
+    ports:
+      - "5014:5014"
+    environment:
+      - REVIEW_SERVICE_PORT=5014
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped
+
+  # 16. Analytics Service
+  analytics-service:
+    build: .
+    container_name: timebank-analytics-service
+    command: ["npx", "tsx", "server/microservices/analytics/server.ts"]
+    ports:
+      - "5015:5015"
+    environment:
+      - ANALYTICS_SERVICE_PORT=5015
+      - STANDALONE=true
+    volumes:
+      - timebank-data:/app/server/data
+    networks:
+      - timebank-net
+    restart: unless-stopped

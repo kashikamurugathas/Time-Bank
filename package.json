@@ -9,7 +9,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "microservices:start": "tsx server/microservices/runner.ts",
+    "microservices:gateway": "tsx server/microservices/gateway/server.ts",
+    "microservices:auth": "tsx server/microservices/auth/server.ts",
+    "microservices:users": "tsx server/microservices/users/server.ts",
+    "microservices:wallet": "tsx server/microservices/wallet/server.ts",
+    "microservices:bookings": "tsx server/microservices/bookings/server.ts"
   },
   "dependencies": {
     "@google/genai": "^2.32.0",
