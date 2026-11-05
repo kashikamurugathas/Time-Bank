@@ -48,6 +48,15 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentView }) => {
                 <button onClick={() => setCurrentView('how-it-works')} className="hover:text-white transition-colors">How It Works</button>
               </li>
               <li>
+                <button onClick={() => setCurrentView('how-it-works/member')} className="hover:text-white transition-colors">Member Guide</button>
+              </li>
+              <li>
+                <button onClick={() => setCurrentView('how-it-works/community-coordinator')} className="hover:text-white transition-colors">Coordinator Guide</button>
+              </li>
+              <li>
+                <button onClick={() => setCurrentView('how-it-works/admin')} className="hover:text-white transition-colors">Administrator Guide</button>
+              </li>
+              <li>
                 <button onClick={() => setCurrentView('skills')} className="hover:text-white transition-colors">Explore Skills</button>
               </li>
               <li>

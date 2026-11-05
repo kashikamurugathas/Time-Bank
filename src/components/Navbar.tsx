@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, ope
             <button
               onClick={() => setCurrentView('how-it-works')}
               className={`px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                currentView === 'how-it-works' ? 'text-[#6C3FC5] bg-[#F2ECFF]' : 'text-gray-600 hover:text-[#6C3FC5] hover:bg-gray-50'
+                currentView === 'how-it-works' || currentView.startsWith('how-it-works') ? 'text-[#6C3FC5] bg-[#F2ECFF]' : 'text-gray-600 hover:text-[#6C3FC5] hover:bg-gray-50'
               }`}
             >
               How It Works

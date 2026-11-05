@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { Navbar } from './components/Navbar.tsx';
 import { Footer } from './components/Footer.tsx';
 import { HomePage } from './components/home/HomePage.tsx';
-import { HeroSection } from './components/home/HeroSection.tsx';
-import { HowItWorks } from './components/home/HowItWorks.tsx';
 import { CommunitySkillsSection } from './components/home/CommunitySkillsSection.tsx';
 import { NearbyHelpersSection } from './components/home/NearbyHelpersSection.tsx';
 import { MembershipSection } from './components/home/MembershipSection.tsx';
-import { ImpactSection } from './components/home/ImpactSection.tsx';
 import { FaqContactSection } from './components/home/FaqContactSection.tsx';
 import { AiAssistant } from './components/AiAssistant.tsx';
+
+// Dedicated How It Works Role Pages
+import { HowItWorksMain } from './components/how-it-works/HowItWorksMain.tsx';
+import { MemberHowItWorks } from './components/how-it-works/MemberHowItWorks.tsx';
+import { CoordinatorHowItWorks } from './components/how-it-works/CoordinatorHowItWorks.tsx';
+import { AdminHowItWorks } from './components/how-it-works/AdminHowItWorks.tsx';
 
 // Modals
 import { LoginModal } from './components/auth/LoginModal.tsx';
@@ -32,7 +36,10 @@ import { Booking, HelperRecommendation, SubscriptionPlan } from './types/index.t
 
 function AppContent() {
   const { user, refreshProfile, setShowLoginModal, setShowRegisterModal } = useAuth();
-  const [currentView, setCurrentView] = useState<string>('home');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentPath = location.pathname.replace(/^\//, '') || 'home';
 
   // Modals state
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
@@ -45,7 +52,15 @@ function AppContent() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentView]);
+  }, [location.pathname]);
+
+  const handleNavigate = (view: string) => {
+    if (view === 'home' || view === '') {
+      navigate('/');
+    } else {
+      navigate(`/${view}`);
+    }
+  };
 
   const handleSelectSkill = (skillName: string) => {
     setInitialSkillForRequest(skillName);
@@ -57,7 +72,6 @@ function AppContent() {
   };
 
   const handleSelectHelper = (helper: HelperRecommendation) => {
-    // Open chat or direct booking
     setChatTarget({ id: helper.userId, name: helper.fullName, photo: helper.profilePhotoUrl });
     setChatOpen(true);
   };
@@ -79,116 +93,180 @@ function AppContent() {
     <div className="min-h-screen flex flex-col bg-[#F7F7FB]">
       {/* Navigation Bar */}
       <Navbar
-        currentView={currentView}
-        setCurrentView={setCurrentView}
+        currentView={currentPath}
+        setCurrentView={handleNavigate}
         openChat={() => handleOpenChat()}
       />
 
       {/* Main View Router */}
       <main className="flex-1">
-        {currentView === 'home' && (
-          <HomePage
-            setCurrentView={setCurrentView}
-            onJoinCommunity={() => setShowRegisterModal(true)}
-            onExplore={() => setCurrentView('skills')}
+        <Routes>
+          {/* Home Page */}
+          <Route
+            path="/"
+            element={
+              <HomePage
+                setCurrentView={handleNavigate}
+                onJoinCommunity={() => setShowRegisterModal(true)}
+                onExplore={() => navigate('/skills')}
+              />
+            }
           />
-        )}
-
-        {currentView === 'skills' && (
-          <div className="py-6">
-            <CommunitySkillsSection onSelectSkill={handleSelectSkill} />
-          </div>
-        )}
-
-        {currentView === 'nearby' && (
-          <div className="py-6">
-            <NearbyHelpersSection onSelectHelper={handleSelectHelper} onRequestHelp={() => setIsCreateRequestOpen(true)} />
-          </div>
-        )}
-
-        {currentView === 'how-it-works' && (
-          <div className="py-6">
-            <HowItWorks setCurrentView={setCurrentView} />
-            <FaqContactSection />
-          </div>
-        )}
-
-        {currentView === 'communities' && (
-          <CommunityDashboard />
-        )}
-
-        {currentView === 'membership' && (
-          <div className="py-6">
-            <MembershipSection onSelectPlan={handleSelectPlan} />
-          </div>
-        )}
-
-        {currentView === 'contact' && (
-          <div className="py-6">
-            <FaqContactSection />
-          </div>
-        )}
-
-        {currentView === 'dashboard' && (
-          <MemberDashboard
-            onOpenCreateRequest={() => setIsCreateRequestOpen(true)}
-            onOpenBooking={(b) => setSelectedBooking(b)}
-            onOpenChat={handleOpenChat}
-            onOpenUpgrade={() => setCurrentView('membership')}
+          <Route
+            path="/home"
+            element={
+              <HomePage
+                setCurrentView={handleNavigate}
+                onJoinCommunity={() => setShowRegisterModal(true)}
+                onExplore={() => navigate('/skills')}
+              />
+            }
           />
-        )}
 
-        {currentView === 'admin' && (
-          <AdminDashboard />
-        )}
+          {/* Three Separate Role-Based How It Works Pages & Main Hub */}
+          <Route path="/how-it-works" element={<HowItWorksMain />} />
+          <Route path="/how-it-works/member" element={<MemberHowItWorks />} />
+          <Route path="/how-it-works/community-coordinator" element={<CoordinatorHowItWorks />} />
+          <Route path="/how-it-works/admin" element={<AdminHowItWorks />} />
 
-        {currentView === 'wallet' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <WalletView />
-          </div>
-        )}
+          {/* Skills Exploration */}
+          <Route
+            path="/skills"
+            element={
+              <div className="py-6">
+                <CommunitySkillsSection onSelectSkill={handleSelectSkill} />
+              </div>
+            }
+          />
 
-        {currentView === 'learning' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <LearningJourneySection
-              records={user?.learningJourney || []}
-              onRefresh={refreshProfile}
-            />
-          </div>
-        )}
+          {/* Nearby Helpers */}
+          <Route
+            path="/nearby"
+            element={
+              <div className="py-6">
+                <NearbyHelpersSection
+                  onSelectHelper={handleSelectHelper}
+                  onRequestHelp={() => setIsCreateRequestOpen(true)}
+                />
+              </div>
+            }
+          />
 
-        {currentView === 'privacy' && (
-          <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
-            <h2 className="font-display font-bold text-3xl text-[#452080]">Privacy Policy &bull; Location Protection</h2>
-            <div className="bg-white p-8 rounded-3xl border border-[#EAE7F6] text-xs leading-relaxed space-y-4 text-gray-700">
-              <p>At <strong>Time Bank</strong>, member safety and privacy are paramount:</p>
-              <h4 className="font-bold text-sm text-[#452080]">1. Exact Residential Coordinates Shielding</h4>
-              <p>We do not disclose exact street addresses, building numbers, or GPS lat/long to other users. The platform uses Haversine distance computations solely to show approximate distances (e.g. &ldquo;2.4 km away in Nallur, Jaffna&rdquo;).</p>
-              <h4 className="font-bold text-sm text-[#452080]">2. Mandatory Registration Review</h4>
-              <p>All registration applications are held in PENDING status for administrator review before dashboard access is permitted.</p>
-              <h4 className="font-bold text-sm text-[#452080]">3. Time Credit Ledger Integrity</h4>
-              <p>All time exchange records and credits are saved securely in SQLite database ledgers. Time credits are never sold or converted into cash.</p>
-            </div>
-          </div>
-        )}
+          {/* Local Communities */}
+          <Route path="/communities" element={<CommunityDashboard />} />
 
-        {currentView === 'terms' && (
-          <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
-            <h2 className="font-display font-bold text-3xl text-[#452080]">Terms of Exchange &bull; Community Code</h2>
-            <div className="bg-white p-8 rounded-3xl border border-[#EAE7F6] text-xs leading-relaxed space-y-4 text-gray-700">
-              <h4 className="font-bold text-sm text-[#452080]">1. Equal Valuation Principle</h4>
-              <p>One hour of service equals one Time Credit regardless of the technical discipline, academic qualification, or nature of assistance.</p>
-              <h4 className="font-bold text-sm text-[#452080]">2. Mutual Confirmation</h4>
-              <p>Time credits are transferred only after both the requester and helper confirm completion of the session.</p>
-              <h4 className="font-bold text-sm text-[#452080]">3. Non-Monetary Exchange</h4>
-              <p>Members agree never to solicit cash, gratuity, or monetary payment for services exchanged under the Time Bank platform.</p>
-            </div>
-          </div>
-        )}
+          {/* Membership Plans */}
+          <Route
+            path="/membership"
+            element={
+              <div className="py-6">
+                <MembershipSection onSelectPlan={handleSelectPlan} />
+              </div>
+            }
+          />
+
+          {/* Contact Page */}
+          <Route
+            path="/contact"
+            element={
+              <div className="py-6">
+                <FaqContactSection />
+              </div>
+            }
+          />
+
+          {/* Member Dashboard */}
+          <Route
+            path="/dashboard"
+            element={
+              <MemberDashboard
+                onOpenCreateRequest={() => setIsCreateRequestOpen(true)}
+                onOpenBooking={(b) => setSelectedBooking(b)}
+                onOpenChat={handleOpenChat}
+                onOpenUpgrade={() => navigate('/membership')}
+              />
+            }
+          />
+
+          {/* Admin Dashboard */}
+          <Route path="/admin" element={<AdminDashboard />} />
+
+          {/* Time Credit Wallet */}
+          <Route
+            path="/wallet"
+            element={
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <WalletView />
+              </div>
+            }
+          />
+
+          {/* Learning Journey */}
+          <Route
+            path="/learning"
+            element={
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <LearningJourneySection
+                  records={user?.learningJourney || []}
+                  onRefresh={refreshProfile}
+                />
+              </div>
+            }
+          />
+
+          {/* Privacy Policy */}
+          <Route
+            path="/privacy"
+            element={
+              <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
+                <h2 className="font-display font-bold text-3xl text-[#452080]">Privacy Policy &bull; Location Protection</h2>
+                <div className="bg-white p-8 rounded-3xl border border-[#EAE7F6] text-xs leading-relaxed space-y-4 text-gray-700">
+                  <p>At <strong>Time Bank</strong>, member safety and privacy are paramount:</p>
+                  <h4 className="font-bold text-sm text-[#452080]">1. Exact Residential Coordinates Shielding</h4>
+                  <p>We do not disclose exact street addresses, building numbers, or GPS lat/long to other users. The platform uses Haversine distance computations solely to show approximate distances (e.g. &ldquo;2.4 km away in Nallur, Jaffna&rdquo;).</p>
+                  <h4 className="font-bold text-sm text-[#452080]">2. Mandatory Registration Review</h4>
+                  <p>All registration applications are held in PENDING status for administrator review before dashboard access is permitted.</p>
+                  <h4 className="font-bold text-sm text-[#452080]">3. Time Credit Ledger Integrity</h4>
+                  <p>All time exchange records and credits are saved securely in SQLite database ledgers. Time credits are never sold or converted into cash.</p>
+                </div>
+              </div>
+            }
+          />
+
+          {/* Terms of Exchange */}
+          <Route
+            path="/terms"
+            element={
+              <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
+                <h2 className="font-display font-bold text-3xl text-[#452080]">Terms of Exchange &bull; Community Code</h2>
+                <div className="bg-white p-8 rounded-3xl border border-[#EAE7F6] text-xs leading-relaxed space-y-4 text-gray-700">
+                  <h4 className="font-bold text-sm text-[#452080]">1. Equal Valuation Principle</h4>
+                  <p>One hour of service equals one Time Credit regardless of the technical discipline, academic qualification, or nature of assistance.</p>
+                  <h4 className="font-bold text-sm text-[#452080]">2. Mutual Confirmation</h4>
+                  <p>Time credits are transferred only after both the requester and helper confirm completion of the session.</p>
+                  <h4 className="font-bold text-sm text-[#452080]">3. Non-Monetary Exchange</h4>
+                  <p>Members agree never to solicit cash, gratuity, or monetary payment for services exchanged under the Time Bank platform.</p>
+                </div>
+              </div>
+            }
+          />
+
+          {/* Catch-all fallback */}
+          <Route
+            path="*"
+            element={
+              <HomePage
+                setCurrentView={handleNavigate}
+                onJoinCommunity={() => setShowRegisterModal(true)}
+                onExplore={() => navigate('/skills')}
+              />
+            }
+          />
+        </Routes>
       </main>
 
       {/* Footer */}
-      <Footer setCurrentView={setCurrentView} />
+      <Footer setCurrentView={handleNavigate} />
 
       {/* Floating AI Assistant across application */}
       <AiAssistant />
@@ -197,9 +275,9 @@ function AppContent() {
       <LoginModal
         onSuccess={() => {
           if (user?.roleId === 'SUPER_ADMIN' || user?.roleId === 'ADMIN') {
-            setCurrentView('admin');
+            navigate('/admin');
           } else {
-            setCurrentView('dashboard');
+            navigate('/dashboard');
           }
         }}
         onOpenRegister={() => setShowRegisterModal(true)}
@@ -217,7 +295,7 @@ function AppContent() {
         initialSkill={initialSkillForRequest}
         onCreated={() => {
           refreshProfile();
-          setCurrentView('dashboard');
+          navigate('/dashboard');
         }}
       />
 
