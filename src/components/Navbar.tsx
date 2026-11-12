@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import {
-  Clock, Shield, User, LogOut, Bell, MessageSquare,
+  Clock, Shield, User, LogOut, Bell,
   Sparkles, Menu, X, ChevronDown, CheckCircle, ExternalLink, Key
 } from 'lucide-react';
 import { api } from '../services/api.ts';
@@ -10,7 +10,7 @@ import { NotificationItem } from '../types/index.ts';
 interface NavbarProps {
   currentView: string;
   setCurrentView: (view: string) => void;
-  openChat: () => void;
+  openChat?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, openChat }) => {
@@ -19,23 +19,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, ope
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadMsgCount, setUnreadMsgCount] = useState<number>(0);
 
-  const fetchNotifsAndMessages = async () => {
+  const fetchNotifs = async () => {
     if (!user) return;
     try {
       const notifs = await api.getNotifications();
       setNotifications(notifs || []);
-      const msgRes = await api.getUnreadCount();
-      setUnreadMsgCount(msgRes?.count || 0);
     } catch {
       // ignore
     }
   };
 
   useEffect(() => {
-    fetchNotifsAndMessages();
-    const interval = setInterval(fetchNotifsAndMessages, 15000);
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 15000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -163,20 +160,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, ope
                   </div>
                 </button>
 
-                {/* Messages Button */}
-                <button
-                  onClick={openChat}
-                  className="relative p-2 rounded-xl text-gray-600 hover:text-[#6C3FC5] hover:bg-[#F2ECFF] transition-colors"
-                  title="Messages"
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  {unreadMsgCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6C3FC5] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-                      {unreadMsgCount}
-                    </span>
-                  )}
-                </button>
-
                 {/* Notifications Bell */}
                 <div className="relative">
                   <button
@@ -259,26 +242,42 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, ope
                     }}
                     className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-50 transition-colors"
                   >
-                    <img
-                      src={user.profilePhotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80'}
-                      alt={user.fullName}
-                      className="w-9 h-9 rounded-xl object-cover ring-2 ring-[#6C3FC5]/30"
-                    />
+                    {user.profilePhotoUrl ? (
+                      <img
+                        src={user.profilePhotoUrl}
+                        alt={user.fullName}
+                        className="w-9 h-9 rounded-full object-cover ring-2 ring-[#6C3FC5]/40"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C3FC5] to-[#452080] flex items-center justify-center text-white text-xs font-bold ring-2 ring-[#6C3FC5]/40 shadow-xs">
+                        {(user.fullName || user.email || 'U').substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     <ChevronDown className="w-4 h-4 text-gray-400 hidden sm:block" />
                   </button>
 
                   {userDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#EAE7F6] py-2 z-50">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-bold text-gray-900 truncate">{user.fullName}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2ECFF] text-[#6C3FC5]">
-                            {user.roleId}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-                            {user.accountType}
-                          </span>
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+                        {user.profilePhotoUrl ? (
+                          <img
+                            src={user.profilePhotoUrl}
+                            alt={user.fullName}
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-[#6C3FC5]/30 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6C3FC5] to-[#452080] flex items-center justify-center text-white text-xs font-bold ring-2 ring-[#6C3FC5]/30 shrink-0">
+                            {(user.fullName || user.email || 'U').substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-gray-900 truncate">{user.fullName}</p>
+                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2ECFF] text-[#6C3FC5]">
+                              {user.roleId}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -289,6 +288,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView, ope
                         >
                           <User className="w-4 h-4" /> Dashboard Overview
                         </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => { setCurrentView('admin-profile'); setUserDropdownOpen(false); }}
+                            className="w-full text-left px-4 py-2 text-xs font-bold text-[#6C3FC5] hover:bg-[#F2ECFF] flex items-center gap-2"
+                          >
+                            <User className="w-4 h-4" /> Admin Profile &amp; Photo
+                          </button>
+                        )}
                         <button
                           onClick={() => { setCurrentView('learning'); setUserDropdownOpen(false); }}
                           className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-[#F2ECFF] hover:text-[#6C3FC5] flex items-center gap-2"

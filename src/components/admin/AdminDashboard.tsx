@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Shield, UserCheck, Users, Clock, Award, AlertCircle, CheckCircle2,
-  XCircle, Ban, Search, DollarSign, FileText, Settings, Key, Sliders, ExternalLink
+  XCircle, Ban, Search, DollarSign, FileText, Settings, Key, Sliders, ExternalLink, User
 } from 'lucide-react';
 import { api } from '../../services/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { SubscriptionPlan } from '../../types/index.ts';
+import { AdminProfileSection } from './AdminProfileSection.tsx';
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  initialTab?: 'OVERVIEW' | 'APPROVALS' | 'USERS' | 'PLANS' | 'TRANSACTIONS' | 'LOGS' | 'PROFILE';
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialTab = 'APPROVALS' }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'APPROVALS' | 'USERS' | 'PLANS' | 'TRANSACTIONS' | 'LOGS'>('APPROVALS');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'APPROVALS' | 'USERS' | 'PLANS' | 'TRANSACTIONS' | 'LOGS' | 'PROFILE'>(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam.toUpperCase() === 'PROFILE') return 'PROFILE';
+    return initialTab;
+  });
   const [report, setReport] = useState<any>(null);
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -143,15 +154,48 @@ export const AdminDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
-            <div className="text-center">
-              <span className="text-[10px] font-bold text-purple-200 uppercase block">Pending Review</span>
-              <span className="font-display font-black text-2xl text-amber-300">{pendingUsers.length}</span>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Quick Admin Profile Card with Circular Photo */}
+            <div
+              onClick={() => setActiveTab('PROFILE')}
+              className="flex items-center gap-3 bg-white/10 hover:bg-white/15 backdrop-blur-md p-2.5 px-4 rounded-2xl border border-white/20 transition-all cursor-pointer group"
+              title="View and manage Admin Profile & Photo"
+            >
+              <div className="relative">
+                {user?.profilePhotoUrl ? (
+                  <img
+                    src={user.profilePhotoUrl}
+                    alt={user.fullName || 'Admin'}
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-white/60 shadow-md group-hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white ring-2 ring-white/60 font-display font-extrabold text-sm group-hover:scale-105 transition-transform">
+                    KM
+                  </div>
+                )}
+                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-[#452080] rounded-full" />
+              </div>
+              <div className="text-left hidden sm:block">
+                <div className="text-xs font-bold text-white flex items-center gap-1">
+                  <span>{user?.fullName || 'Kashika Murugathas'}</span>
+                </div>
+                <div className="text-[10px] text-purple-200 group-hover:text-white font-medium flex items-center gap-1">
+                  <span>Manage Photo &amp; Profile</span>
+                  <span>&rarr;</span>
+                </div>
+              </div>
             </div>
-            <div className="h-8 w-px bg-white/20" />
-            <div className="text-center">
-              <span className="text-[10px] font-bold text-purple-200 uppercase block">Total Members</span>
-              <span className="font-display font-black text-2xl text-white">{report?.users?.total || 0}</span>
+
+            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3.5 px-4 rounded-2xl border border-white/20">
+              <div className="text-center">
+                <span className="text-[10px] font-bold text-purple-200 uppercase block">Pending Review</span>
+                <span className="font-display font-black text-2xl text-amber-300">{pendingUsers.length}</span>
+              </div>
+              <div className="h-8 w-px bg-white/20" />
+              <div className="text-center">
+                <span className="text-[10px] font-bold text-purple-200 uppercase block">Total Members</span>
+                <span className="font-display font-black text-2xl text-white">{report?.users?.total || 0}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -173,6 +217,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="flex items-center gap-2 border-b border-gray-200 overflow-x-auto no-scrollbar pb-1">
         {[
           { id: 'APPROVALS', label: `Pending Approvals (${pendingUsers.length})`, highlight: pendingUsers.length > 0 },
+          { id: 'PROFILE', label: 'Admin Profile' },
           { id: 'OVERVIEW', label: 'Platform KPIs' },
           { id: 'USERS', label: `User Management (${allUsers.length})` },
           { id: 'PLANS', label: 'Subscriptions & Pricing' },
@@ -537,6 +582,11 @@ export const AdminDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Tab: ADMIN PROFILE & PHOTO MANAGEMENT */}
+      {activeTab === 'PROFILE' && (
+        <AdminProfileSection />
       )}
 
       {/* Reject Modal */}

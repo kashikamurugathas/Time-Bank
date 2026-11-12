@@ -57,6 +57,8 @@ function AppContent() {
   const handleNavigate = (view: string) => {
     if (view === 'home' || view === '') {
       navigate('/');
+    } else if (view === 'admin-profile') {
+      navigate('/admin/profile');
     } else {
       navigate(`/${view}`);
     }
@@ -190,6 +192,7 @@ function AppContent() {
 
           {/* Admin Dashboard */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminDashboard initialTab="PROFILE" />} />
 
           {/* Time Credit Wallet */}
           <Route
